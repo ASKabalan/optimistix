@@ -28,7 +28,6 @@ from .._search import (
     FunctionInfo,
 )
 from .._solution import RESULTS
-from .backtracking import BacktrackingArmijo
 from .gauss_newton import NewtonDescent
 from .zoom import Zoom
 
@@ -446,7 +445,7 @@ class BFGS(AbstractBFGS[Y, Aux, _Hessian]):
     norm: Callable[[PyTree], Scalar]
     use_inverse: bool
     descent: NewtonDescent
-    search: BacktrackingArmijo
+    search: AbstractSearch
     verbose: frozenset[str]
 
     def __init__(
@@ -464,7 +463,7 @@ class BFGS(AbstractBFGS[Y, Aux, _Hessian]):
         self.use_inverse = use_inverse
         self.descent = NewtonDescent(linear_solver=lx.Cholesky())
         # TODO(raderj): switch out `BacktrackingArmijo` with a better line search.
-        self.search = BacktrackingArmijo()
+        self.search = search
         self.verbose = verbose
 
 
@@ -607,7 +606,7 @@ class DFP(AbstractDFP[Y, Aux, _Hessian]):
     norm: Callable[[PyTree], Scalar]
     use_inverse: bool
     descent: NewtonDescent
-    search: BacktrackingArmijo
+    search: AbstractSearch
     verbose: frozenset[str]
 
     def __init__(
@@ -624,8 +623,7 @@ class DFP(AbstractDFP[Y, Aux, _Hessian]):
         self.norm = norm
         self.use_inverse = use_inverse
         self.descent = NewtonDescent(linear_solver=lx.Cholesky())
-        # TODO(raderj): switch out `BacktrackingArmijo` with a better line search.
-        self.search = BacktrackingArmijo()
+        self.search = search
         self.verbose = verbose
 
 

@@ -16,12 +16,10 @@ from .._misc import (
     max_norm,
     tree_dot,
 )
-from .._search import (
-    FunctionInfo,
-)
-from .backtracking import BacktrackingArmijo
+from .._search import AbstractSearch, FunctionInfo
 from .gauss_newton import NewtonDescent
 from .quasi_newton import AbstractQuasiNewton
+from .zoom import Zoom
 
 
 _Hessian = TypeVar(
@@ -567,7 +565,7 @@ class LBFGS(AbstractLBFGS[Y, Aux, _Hessian, _LBFGSUpdateState]):
     norm: Callable[[PyTree], Scalar]
     use_inverse: bool
     descent: NewtonDescent
-    search: BacktrackingArmijo
+    search: AbstractSearch
     history_length: int
     verbose: frozenset[str]
 
@@ -579,13 +577,14 @@ class LBFGS(AbstractLBFGS[Y, Aux, _Hessian, _LBFGSUpdateState]):
         use_inverse: bool = True,
         history_length: int = 10,
         verbose: frozenset[str] = frozenset(),
+        search: AbstractSearch = Zoom(initial_guess_strategy="one"),
     ):
         self.rtol = rtol
         self.atol = atol
         self.norm = norm
         self.use_inverse = use_inverse
         self.descent = NewtonDescent()
-        self.search = BacktrackingArmijo()
+        self.search = search
         self.history_length = history_length
         self.verbose = verbose
 
