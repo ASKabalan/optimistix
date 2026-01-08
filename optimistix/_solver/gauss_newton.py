@@ -33,6 +33,7 @@ def newton_step(
     | FunctionInfo.EvalGradHessianInv
     | FunctionInfo.ResidualJac,
     linear_solver: lx.AbstractLinearSolver,
+    options: dict[str, Any] = {},
 ) -> tuple[PyTree[Array], RESULTS]:
     """Compute a Newton step.
 
@@ -71,7 +72,7 @@ def newton_step(
                 "Cannot use a Newton descent with a solver that only evaluates the "
                 "gradient, or only the function itself."
             )
-        out = lx.linear_solve(operator, vector, linear_solver, throw=False)
+        out = lx.linear_solve(operator, vector, linear_solver, throw=False, options=options)
         newton = out.value
         result = RESULTS.promote(out.result)
     return newton, result
@@ -80,6 +81,7 @@ def newton_step(
 class _NewtonDescentState(eqx.Module, Generic[Y]):
     newton: Y
     result: RESULTS
+    options: dict[str, Any] = eqx.field(default_factory=dict)
 
 
 class NewtonDescent(
@@ -103,10 +105,12 @@ class NewtonDescent(
     norm: Callable[[PyTree], Scalar] | None = None
     linear_solver: lx.AbstractLinearSolver = lx.AutoLinearSolver(well_posed=None)
 
-    def init(self, y: Y, f_info_struct: FunctionInfo) -> _NewtonDescentState:
+    def init(
+        self, y: Y, f_info_struct: FunctionInfo, options: dict[str, Any] = {}
+    ) -> _NewtonDescentState:
         del f_info_struct
         # Dummy values of the right shape; unused.
-        return _NewtonDescentState(y, RESULTS.successful)
+        return _NewtonDescentState(y, RESULTS.successful, options)
 
     def query(
         self,
@@ -115,12 +119,15 @@ class NewtonDescent(
         | FunctionInfo.EvalGradHessianInv
         | FunctionInfo.ResidualJac,
         state: _NewtonDescentState,
+        options: dict[str, Any] = {},
     ) -> _NewtonDescentState:
-        del state
-        newton, result = newton_step(f_info, self.linear_solver)
+        del y
+        # Runtime options override state options
+        merged_options = {**state.options, **options}
+        newton, result = newton_step(f_info, self.linear_solver, options=merged_options)
         if self.norm is not None:
             newton = (newton**ω / self.norm(newton)).ω
-        return _NewtonDescentState(newton, result)
+        return _NewtonDescentState(newton, result, merged_options)
 
     def step(self, step_size: Scalar, state: _NewtonDescentState) -> tuple[Y, RESULTS]:
         return (-step_size * state.newton**ω).ω, state.result

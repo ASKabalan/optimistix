@@ -50,3 +50,6 @@ from .trust_region import (
     LinearTrustRegion as LinearTrustRegion,
 )
 from .zoom import Zoom as Zoom
+from .truncated_newton import (
+    TruncatedNewtonConstrained as TruncatedNewtonConstrained,
+)

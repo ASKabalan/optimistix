@@ -26,6 +26,12 @@ from ._misc import (
     rms_norm as rms_norm,
     two_norm as two_norm,
 )
+from ._progress_meter import (
+    AbstractProgressMeter as AbstractProgressMeter,
+    NoProgressMeter as NoProgressMeter,
+    TextProgressMeter as TextProgressMeter,
+    TqdmProgressMeter as TqdmProgressMeter,
+)
 from ._root_find import (
     AbstractRootFinder as AbstractRootFinder,
     root_find as root_find,
@@ -77,6 +83,7 @@ from ._solver import (
     OptaxMinimiser as OptaxMinimiser,
     polak_ribiere as polak_ribiere,
     SteepestDescent as SteepestDescent,
+    TruncatedNewtonConstrained as TruncatedNewtonConstrained,
     Zoom as Zoom,
 )
 
