@@ -279,10 +279,10 @@ _lsqr_only = (
 atol = rtol = 1e-8
 _general_minimisers = (
     optx.NelderMead(rtol, atol),
-    optx.BFGS(rtol, atol, use_inverse=False),
-    optx.BFGS(rtol, atol, use_inverse=True),
-    optx.LBFGS(rtol, atol, use_inverse=False),
-    optx.LBFGS(rtol, atol, use_inverse=True),
+    optx.BFGS(rtol, atol, use_inverse=False, search=optx.BacktrackingArmijo()),
+    optx.BFGS(rtol, atol, use_inverse=True, search=optx.BacktrackingArmijo()),
+    optx.LBFGS(rtol, atol, use_inverse=False, search=optx.BacktrackingArmijo()),
+    optx.LBFGS(rtol, atol, use_inverse=True, search=optx.BacktrackingArmijo()),
     BFGSDampedNewton(rtol, atol),
     BFGSIndirectDampedNewton(rtol, atol),
     # Tighter tolerance needed to have BFGSDogleg pass the JVP test.
